@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script>
+        var ws = new WebSocket("ws://localhost:8181");
+
+
+    ws.onmessage = function(e) {
+        var data = JSON.parse(e.data);
+        var messages = document.getElementById('messages');
+        var message = document.createElement("li");
+            message.innerHTML = data.message;
+            messages.appendChild(message);
+    }
+
+
+        ws.onopen = function(e) {
+          console.log('Connection to server opened');
+        }
+
+        function sendMessage() {
+            ws.send($('#message').val());
+        }
+    </script>
+    <div class="vertical-center">
+    <div class="container">
+        <p>&nbsp;</p>
+
+    <ul id="messages"></ul>
+    <form role="form" id="chat_form" onsubmit="sendMessage(); return false;">
+        <div class="form-group">
+        <input class="form-control" type="text" name="message" id="message"
+          placeholder="Type text to echo in here" value="" autofocus/>
+        </div>
+        <button type="button" id="send" class="btn btn-primary"
+          onclick="sendMessage();">Send!</button>
+    </form>
+    </div>
+    </div>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>

@@ -1,0 +1,112 @@
+
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script>
+        var ws = new WebSocket("ws://localhost:8181");
+
+        ws.onopen = function(e) {
+          console.log("Connection established");
+          ws.send(JSON.stringify(stock_request));
+        }
+
+
+
+
+
+        // code from chapter goes here
+        var stock_request = {"stocks": ["AAPL", "MSFT", "AMZN", "GOOG", "YHOO"]};
+
+        var stocks = {"AAPL": 0,
+                          "MSFT": 0,
+                          "AMZN": 0,
+                          "GOOG": 0,
+                          "YHOO": 0};
+
+
+
+
+       // UI update function
+        var changeStockEntry = function(symbol, originalValue, newValue) {
+                var valElem = $('#' + symbol + ' span');
+                valElem.html(newValue.toFixed(2));
+                if(newValue < originalValue) {
+                        valElem.addClass('label-danger');
+                        valElem.removeClass('label-success');
+                } else if(newValue > originalValue) {
+                        valElem.addClass('label-success');
+                        valElem.removeClass('label-danger');
+                }
+        };
+
+       // WebSocket message handler
+        ws.onmessage = function(e) {
+                var stocksData = JSON.parse(e.data);
+                for(var symbol in stocksData) {
+                        if(stocksData.hasOwnProperty(symbol)) {
+                                changeStockEntry(symbol, stocksData[symbol], stocks[symbol]);
+                                stocks[symbol] = stocksData[symbol];
+                        }
+                }
+        };
+
+         ws.onerror = function(e) {
+                console.log("WebSocket failure, error", e);
+                handleErrors(e);
+        };
+
+     ws.onclose = function(e) {
+                console.log("WebSocket connection closed", e);
+                for(var symbol in stocks) {
+                        if(stocks.hasOwnProperty(symbol)) {
+                                stocks[symbol] = 0;
+                        }
+                }
+        };
+         function processEvent(e) {
+                if(ws.readyState === WebSocket.OPEN) {
+                        // Socket open, send!
+                        ws.send(e);
+                } else {
+                        // Show an error, queue it for sending later, etc
+                }
+        }
+       </script>
+        <div class="vertical-center">
+                <div class="container">
+
+                        <h1>Stock Chart over WebSocket</h1>
+                        <table class="table" id="stockTable">
+                        <thead>
+                                <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                </tr>
+                        </thead>
+                        <tbody id="stockRows">
+                        <tr>
+                                <td><h3>AAPL</h3></td>
+                                <td id="AAPL"><h3><span class="label label-default">95.00</span></h3></td>
+                        </tr>
+                        <tr>
+                                <td><h3>MSFT</h3></td>
+                                <td id="MSFT"><h3><span class="label label-default">50.00</span></h3></td>
+                        </tr>
+                        <tr>
+                                <td><h3>AMZN</h3></td>
+                                <td id="AMZN"><h3><span class="label label-default">300.00</span></h3></td>
+                        </tr>
+                        <tr>
+                                <td><h3>GOOG</h3></td>
+                                <td id="GOOG"><h3><span class="label label-default">550.00</span></h3></td>
+                        </tr>
+                        <tr>
+                                <td><h3>YHOO</h3></td>
+                                <td id="YHOO"><h3><span class="label label-default">35.00</span></h3></td>
+                        </tr>
+                        </tbody>
+                        </table>
+
+                </div>
+        </div>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
